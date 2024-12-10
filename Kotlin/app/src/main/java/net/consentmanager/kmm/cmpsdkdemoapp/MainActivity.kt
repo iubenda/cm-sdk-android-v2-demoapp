@@ -1,6 +1,7 @@
 package net.consentmanager.kmm.cmpsdkdemoapp
 
 import android.os.Bundle
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -15,6 +16,7 @@ import net.consentmanager.sdk.consentlayer.model.CmpUIStrategy
 
 class MainActivity : AppCompatActivity() {
     private lateinit var cmpManager: CmpManager
+    private var isCmpShowing = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,9 +30,27 @@ class MainActivity : AppCompatActivity() {
         }
         CmpUIConfig.uiStrategy = CmpUIStrategy.POPUP
 
-        cmpManager = CmpManager.createInstance(this, config)
-        cmpManager.initialize(this)
+        cmpManager = CmpManager.createInstance(this, config).apply {
+            initialize(this@MainActivity)
+            withOpenListener { isCmpShowing = true }
+            withCloseListener { isCmpShowing = false }
+        }
+        setupBackPressHandler()
         showCMPDemoScreen()
+    }
+
+    private fun setupBackPressHandler() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (isCmpShowing) {
+                    if (CmpUIConfig.backPressCallback?.onBackPressed() != true) {
+                        return
+                    }
+                }
+                isEnabled = false // Disable this callback to allow the system back press to proceed
+                onBackPressedDispatcher.onBackPressed()
+            }
+        })
     }
 
     private fun showCMPDemoScreen() {
