@@ -1,6 +1,7 @@
 package net.consentmanager.kmm.cmpsdkdemoapp
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -23,10 +24,10 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
 
         val config = CmpConfig.apply {
-            id = "Your Code-ID goes here" // TODO replace with your own Code-ID from your CMP
+            id = "YOUR-CODE-ID" // TODO replace with your own Code-ID from your CMP
             domain = "delivery.consentmanager.net"
-            language = "DE"
-            appName = "CMDemoAppSDKv2Kotlin"
+            language = "IT"
+            appName = "CMDemoAppKotlin"
         }
         CmpUIConfig.uiStrategy = CmpUIStrategy.POPUP
 
@@ -34,6 +35,9 @@ class MainActivity : AppCompatActivity() {
             initialize(this@MainActivity)
             withOpenListener { isCmpShowing = true }
             withCloseListener { isCmpShowing = false }
+            withErrorCallback { error, message ->
+                Log.e("CMPDemoApp", "Error: $error, Message: $message")
+            }
         }
         setupBackPressHandler()
         showCMPDemoScreen()
